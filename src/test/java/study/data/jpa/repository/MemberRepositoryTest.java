@@ -1,5 +1,7 @@
 package study.data.jpa.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.assertj.core.api.Assertions;
 import org.hibernate.NonUniqueResultException;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,8 @@ class MemberRepositoryTest {
     MemberRepository memberRepository;
     @Autowired
     TeamRepository teamRepository;
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void testMember() {
@@ -215,5 +219,29 @@ class MemberRepositoryTest {
 //            System.out.println("member = " + member);
 //        }
 //        System.out.println("totalElements = " + totalElements);
+    }
+
+    @Test
+    public void bulkUpdate() {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 30));
+        memberRepository.save(new Member("member6", 40));
+
+        // when
+        int i = memberRepository.bulkAgePlus(20);
+        // 혹은 clearAutomatically = true 설정하기
+//        em.flush(); // 변경되지 않고 남아있는것을 DB에 반영
+//        em.clear(); // 캐시 지우기
+
+
+        List<Member> result = memberRepository.findListByUsername("member5");
+        Member member5 = result.get(0);
+        System.out.println("member5 = " + member5);
+        assertThat(i).isEqualTo(4);
+
     }
 }
