@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/datajpa
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create # 테이블 드랍 후 다시 생성 -> 로컬 환경에서만 사용
+    properties:
+      hibernate:
+        format_sql: true # 포맷팅을 해준다
+#        show_sql: 이거 대신 로그 파일로 남기도록
+
+logging.level:
+    org.hibernate.SQL: debug
+#    org.hibernate.type: trace # 타입까지 볼 수 있는
