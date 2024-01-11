@@ -1,9 +1,11 @@
 package study.data.jpa.repository;
 
 import org.assertj.core.api.Assertions;
+import org.hibernate.NonUniqueResultException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.data.jpa.dto.MemberDto;
@@ -12,8 +14,10 @@ import study.data.jpa.entity.Team;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -135,5 +139,36 @@ class MemberRepositoryTest {
             System.out.println("s = " + s);
 
         }
+    }
+
+    @Test
+    public void returnType() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> aaa = memberRepository.findListByUsername("AAA");
+        Member findMember = memberRepository.findMemberByUsername("AAA");
+        Optional<Member> aaa1 = memberRepository.findOptionalByUsername("AAA");
+        System.out.println("findMember = " + findMember);
+        System.out.println("aaa1 = " + aaa1);
+
+        // 컬렉션은 문제가 있으면 empty 컬렉션을 반환한다
+        // 컬렉션은 무조건 컬렉션으로 돌려받기 때문에 null 체크를 하지말것
+        // 그에 반면에 단건 조회는 null을 받을 수 있다.
+    }
+
+    @Test
+    public void optionalTest() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        // 원래의 에러를 다른 에러로 바꿔서 전달해준다
+        assertThatThrownBy(() -> memberRepository.findOptionalByUsername("AAA"))
+                .isInstanceOf(IncorrectResultSizeDataAccessException.class);
+
     }
 }
