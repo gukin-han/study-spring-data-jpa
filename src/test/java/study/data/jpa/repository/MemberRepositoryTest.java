@@ -244,4 +244,33 @@ class MemberRepositoryTest {
         assertThat(i).isEqualTo(4);
 
     }
+
+    @Test
+    public void findMemberLazy() {
+        // given
+        // member1 -> teamA
+        // member2 -> teamB
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member1", 10, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        // select members!
+        List<Member> members = memberRepository.findEntityGraphByUsername("member1");
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.teamClass = " + member.getTeam().getClass());
+            // 이전 쿼리에서 가져오지 않았다 -> LAZY 옵션 때문에 -> 팀 정보를 가져오기 위해 다시 한 번 쿼리를 날린다
+            System.out.println("member = " + member.getTeam().getName()); // 프록시 초기화
+        }
+    }
 }
