@@ -8,10 +8,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.data.jpa.entity.Member;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @Transactional
 @Rollback(false)
@@ -28,7 +24,7 @@ class MemberRepositoryTest {
         Member findMember = memberRepository.findById(savedMember.getId()).get();
 
         Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());
-        Assertions.assertThat(findMember.getName()).isEqualTo(member.getName());
+        Assertions.assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
     }
 
 
