@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.data.jpa.dto.MemberDto;
@@ -170,5 +174,46 @@ class MemberRepositoryTest {
         assertThatThrownBy(() -> memberRepository.findOptionalByUsername("AAA"))
                 .isInstanceOf(IncorrectResultSizeDataAccessException.class);
 
+    }
+
+    @Test
+    public void paging() {
+        // given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+        memberRepository.save(new Member("member6", 10));
+
+        int age = 10;
+        // 0 부터 시작한다 0부터 세개 가져와
+        // sort 조건은 안넣어도 괜찮다
+        // total count 쿼리까지 같이 날라간다
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+
+        // when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        // 변환을 시켜서 반환을 해준다
+        // 이대로 반환하면 json으로도 반환이 된다
+        Page<MemberDto> toMap = page.map(m -> new MemberDto(m.getId(), m.getUsername(), null));
+
+        // then
+        List<Member> content = page.getContent();
+//        long totalElements = page.getTotalElements();
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(page.getTotalElements()).isEqualTo(6);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+        assertThat(page.isFirst()).isTrue();
+        assertThat(page.hasNext()).isTrue();
+
+//        for (Member member : content) {
+//            System.out.println("member = " + member);
+//        }
+//        System.out.println("totalElements = " + totalElements);
     }
 }
