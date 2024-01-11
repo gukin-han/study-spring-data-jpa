@@ -273,4 +273,36 @@ class MemberRepositoryTest {
             System.out.println("member = " + member.getTeam().getName()); // 프록시 초기화
         }
     }
+
+    @Test
+    public void queryHint() {
+        Member member1 = memberRepository.save(new Member("member1", 10));
+        em.flush(); // 컨텍스트 내부에 정보를 DB와 sync
+        em.clear(); // 컨텍스트 캐시 지우기
+
+        // when
+//        Member findMember = memberRepository.findById(member1.getId()).get();
+//        findMember.setUsername("member2"); // 변경 감지 -> update query
+        // 변경 감지를 알려면 원래 오브젝트가 무엇인지를 알고 있어야 한다 -> 두가지를 만들어놓는다
+        // + 체크하는 과정도 비용이다
+        // 만약 100% 조회용으로 쓴다면 이에 따른 최적화를 적용할 수 있다
+
+        // when
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");
+        findMember.setUsername("member2");
+
+        em.flush();
+
+    }
+
+    @Test
+    public void lock() {
+        Member member1 = memberRepository.save(new Member("member1", 10));
+        em.flush(); // 컨텍스트 내부에 정보를 DB와 sync
+        em.clear(); // 컨텍스트 캐시 지우기
+
+        // when
+        List<Member> result = memberRepository.findLockByUsername("member1");
+
+    }
 }

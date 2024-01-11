@@ -1,12 +1,11 @@
 package study.data.jpa.repository;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.data.jpa.dto.MemberDto;
 import study.data.jpa.entity.Member;
@@ -41,7 +40,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 메서드 이름은 아무거나 해도 괜찮다
     List<Member> findListByUsername(String username); // 컬렉션
+
     Member findMemberByUsername(String username); // 단건
+
     Optional<Member> findOptionalByUsername(String username); // 단건 Optional
 
     //    Slice<Member> findByAge(int age, Pageable pageable);
@@ -68,4 +69,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @EntityGraph(attributePaths = ("team"))
     List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 }
