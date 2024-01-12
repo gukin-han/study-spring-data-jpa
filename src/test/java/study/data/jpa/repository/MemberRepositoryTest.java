@@ -354,6 +354,26 @@ class MemberRepositoryTest {
         List<Member> all = memberRepository.findAll(example);
 
         Assertions.assertThat(all.get(0).getUsername()).isEqualTo("m1");
+    }
 
+    @Test
+    public void projects() {
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        List<NestedClosedProjects> result = memberRepository.findProjectionByUsername("m1");
+
+        for (NestedClosedProjects usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly.getUsername());
+        }
     }
 }
